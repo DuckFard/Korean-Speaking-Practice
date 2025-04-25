@@ -50,61 +50,55 @@
             </div>
             <ul id="snippet-list"></ul>
         </div>
-        <!-- Inside index.html, alongside the Part-1 box, add: -->
+        <!-- Part 2: Grammar Flashcards Module -->
         <div class="box module-box" data-part="2" id="part2-module" style="display:none;">
           <h2 class="subtitle">Part 2: Grammar Flashcards</h2>
-          <!-- Deck Management -->
+
+          <!-- Bulk Import Manager -->
+          <div id="bulk-input-manager" class="mb-4">
+            <label class="label">Paste all topics & questions here:</label>
+            <textarea id="bulk-input" class="textarea" rows="6" placeholder="
+        1. 명은/는 명이에요
+        1) 이름이 뭐예요?
+        2) 직업이 뭐예요?
+        ...
+        2. 명이/가 아니에요
+        1) ________ 씨는 한국 사람이에요?
+        ..."></textarea>
+            <button id="parse-bulk-btn" class="button is-small is-primary mt-2">
+              Import Topics & Questions
+            </button>
+          </div>
+
+          <!-- Topic List & Question Manager -->
           <div id="deck-manager" class="mb-4">
-            <div class="field has-addons">
-              <div class="control is-expanded">
-                <input id="new-topic-input" class="input is-small" placeholder="New grammar topic">
-              </div>
-              <div class="control">
-                <button id="add-topic-btn" class="button is-small is-primary">Add Topic</button>
-              </div>
-            </div>
+            <ul id="topic-list" class="mt-2"></ul>
 
-            <!-- Topic List -->
-            <ul id="topic-list" class="mt-2">
-              <!-- JS renders topics here -->
-            </ul>
-
-            <!-- Question Manager (hidden until a topic is selected) -->
             <div id="question-manager" class="box" style="display:none; margin-top:1rem;">
               <h3 class="subtitle is-6">
                 Questions for: <strong><span id="selected-topic-name"></span></strong>
               </h3>
-              <div class="field has-addons">
-                <div class="control is-expanded">
-                  <input id="new-question-input" class="input is-small" placeholder="New question">
-                </div>
-                <div class="control">
-                  <button id="add-question-btn" class="button is-small is-primary">Add Question</button>
-                </div>
-              </div>
-              <ul id="question-list" class="mt-2">
-                <!-- JS renders questions here -->
-              </ul>
+              <ul id="question-list" class="mt-2"></ul>
             </div>
           </div>
 
-          <!-- Flashcard Display -->
+          <!-- Flashcard Display (no text‐input answer!) -->
           <div id="flashcard" class="content">
             <p><strong>Topic:</strong> <span id="card-topic">—</span></p>
             <p><strong>Question:</strong> <span id="card-question">—</span></p>
           </div>
-          <div class="field">
-            <label class="label">Your Answer:</label>
-            <div class="control">
-              <textarea id="answer-input" class="textarea" rows="3"></textarea>
-            </div>
-          </div>
-          <div class="buttons">
+
+          <!-- Controls -->
+          <div class="buttons mt-4">
             <button id="prev-card-btn" class="button is-light">Previous</button>
             <button id="next-card-btn" class="button is-link">Next</button>
             <button id="restart-deck-btn" class="button is-warning">Restart Deck</button>
           </div>
+          
+          <!-- Playback for recorded answers -->
+          <audio id="answer-playback" controls class="mt-4"></audio>
         </div>
+
         <!-- Add placeholders for future parts if needed -->
         <!-- 
         <div class="box module-box" data-part="3" id="part3-module" style="display:none;">

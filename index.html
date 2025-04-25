@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Korean Language Speaking Practice - Part 1</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!--Navbar Header  -->
+    <section class="section">
+        <div class="container">
+            <h1 class="title">Korean Speaking Practice - SNU Korean Smart Course +</h1>
+            <nav class="tabs">
+                <ul>
+                    <li class="is-active" data-part="1"><a>Part 1: Read-Aloud</a></li>
+                    <li data-part="2"><a>Part 2: Q&A</a></li>
+                    <li data-part="3"><a>Part 3: Picture Description</a></li>
+                    <li data-part="4"><a>Part 4: Roleplay</a></li>
+                </ul>
+            </nav>
+        </div>
+    </section>
+
+
+    <!-- Main App Container -->
+    <div class="container" id="app">
+        <!-- Read-Aloud Module -->
+        <div class="box module-box" data-part="1" id="part1-module">
+            <h2 class="subtitle">Part 1: Read-Aloud</h2>
+            <div id="display-area" class="content">Click "Next Text" to load a snippet.</div>
+            <div class="buttons">
+                <button id="next-text-btn" class="button is-link">Next Text</button>
+                <button id="play-btn" class="button is-info">Play</button>
+                <button id="record-btn" class="button is-danger">Record</button>
+            </div>
+            <audio id="playback" controls class="mt-4"></audio>
+        </div>
+        <!-- Snippet Management -->
+        <div class="box module-box" data-part="1" id="snippet-manager">
+            <h2 class="subtitle">Manage Text Snippets</h2>
+            <div class="field has-addons">
+                <div class="control is-expanded">
+                    <textarea id="snippet-input" class="textarea" placeholder="Paste a text snippet here..."></textarea>
+                </div>
+                <div class="control">
+                    <button id="add-snippet-btn" class="button is-primary">Add Snippet</button>
+                </div>
+            </div>
+            <ul id="snippet-list"></ul>
+        </div>
+        <!-- Inside index.html, alongside the Part-1 box, add: -->
+        <div class="box module-box" data-part="2" id="part2-module" style="display:none;">
+          <h2 class="subtitle">Part 2: Grammar Flashcards</h2>
+          <!-- Deck Management -->
+          <div id="deck-manager" class="mb-4">
+            <div class="field has-addons">
+              <div class="control is-expanded">
+                <input id="new-topic-input" class="input is-small" placeholder="New grammar topic">
+              </div>
+              <div class="control">
+                <button id="add-topic-btn" class="button is-small is-primary">Add Topic</button>
+              </div>
+            </div>
+
+            <!-- Topic List -->
+            <ul id="topic-list" class="mt-2">
+              <!-- JS renders topics here -->
+            </ul>
+
+            <!-- Question Manager (hidden until a topic is selected) -->
+            <div id="question-manager" class="box" style="display:none; margin-top:1rem;">
+              <h3 class="subtitle is-6">
+                Questions for: <strong><span id="selected-topic-name"></span></strong>
+              </h3>
+              <div class="field has-addons">
+                <div class="control is-expanded">
+                  <input id="new-question-input" class="input is-small" placeholder="New question">
+                </div>
+                <div class="control">
+                  <button id="add-question-btn" class="button is-small is-primary">Add Question</button>
+                </div>
+              </div>
+              <ul id="question-list" class="mt-2">
+                <!-- JS renders questions here -->
+              </ul>
+            </div>
+          </div>
+
+          <!-- Flashcard Display -->
+          <div id="flashcard" class="content">
+            <p><strong>Topic:</strong> <span id="card-topic">—</span></p>
+            <p><strong>Question:</strong> <span id="card-question">—</span></p>
+          </div>
+          <div class="field">
+            <label class="label">Your Answer:</label>
+            <div class="control">
+              <textarea id="answer-input" class="textarea" rows="3"></textarea>
+            </div>
+          </div>
+          <div class="buttons">
+            <button id="prev-card-btn" class="button is-light">Previous</button>
+            <button id="next-card-btn" class="button is-link">Next</button>
+            <button id="restart-deck-btn" class="button is-warning">Restart Deck</button>
+          </div>
+        </div>
+        <!-- Add placeholders for future parts if needed -->
+        <!-- 
+        <div class="box module-box" data-part="3" id="part3-module" style="display:none;">
+            <h2 class="subtitle">Part 3: Picture Description</h2>
+        </div>
+        <div class="box module-box" data-part="4" id="part4-module" style="display:none;">
+            <h2 class="subtitle">Part 4: Roleplay</h2>
+        </div>
+        -->
+    </div>
+    <script src="storage.js" defer></script>
+    <script src="part1.js" defer></script>
+    <script src="app.js" defer></script>
+    <script src="part2.js" defer></script>
+</body>
+</html>

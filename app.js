@@ -21,36 +21,54 @@
     });
   }
 
+  // === Part 2 Enhancements ===
   let selectedTopicIdx = null;
 
   // Render the list of topics in #topic-list
   function renderTopicList() {
+    console.log("--- Rendering Topic List ---"); // Log start of render
     const topicListEl = document.getElementById('topic-list');
+    if (!topicListEl) {
+        console.error("#topic-list element not found!");
+        return;
+    }
     topicListEl.innerHTML = '';
-    const deck = window.grammarStorage.loadDeck();
+    let deck;
+    try {
+        deck = window.grammarStorage.loadDeck();
+        console.log("Loaded Deck for Rendering:", deck); // Log loaded deck
+    } catch (e) {
+        console.error("Error loading deck for rendering:", e);
+        deck = [];
+    }
+
+    if (!deck || deck.length === 0) {
+        console.log("Deck is empty, nothing to render.");
+        return;
+    }
 
     deck.forEach((topic, idx) => {
+      console.log(`Rendering topic ${idx}: ${topic.name}`); // Log each topic being rendered
       // <li data-idx="idx" class="topic-item">Topic Name [Delete]</li>
       const li = document.createElement('li');
       li.className = 'mb-2';
-      li.setAttribute('data-idx', idx);
+      li.dataset.idx = idx;
 
       const titleSpan = document.createElement('span');
       titleSpan.textContent = topic.name;
       titleSpan.style.cursor = 'pointer';
-      titleSpan.addEventListener('click', () => {
-        selectTopic(idx);
-      });
+      titleSpan.addEventListener('click', () => selectTopic(idx));
 
       const delBtn = document.createElement('button');
       delBtn.className = 'button is-small is-danger is-light ml-2';
       delBtn.textContent = 'Delete';
-      delBtn.addEventListener('click', () => {
+      delBtn.addEventListener('click', (e) => { // Added event arg
+        e.stopPropagation(); // Prevent topic selection when deleting
         window.grammarStorage.removeTopic(idx);
-        // If you deleted the selected topic, clear selection
         if (selectedTopicIdx === idx) {
           selectedTopicIdx = null;
-          document.getElementById('question-manager').style.display = 'none';
+          const qm = document.getElementById('question-manager');
+          if(qm) qm.style.display = 'none';
         }
         renderTopicList();
       });
@@ -59,6 +77,7 @@
       li.appendChild(delBtn);
       topicListEl.appendChild(li);
     });
+     console.log("--- Finished Rendering Topic List ---"); // Log end of render
   }
 
   // Handle when a topic is clicked: show question manager
@@ -99,8 +118,126 @@
     });
   }
 
+  // Define parseBulkInput BEFORE init
+  function parseBulkInput(text) {
+    console.log("--- Starting Bulk Input ---");
+    console.log("Raw Text:", text);
+    // Correctly split by actual newline characters
+    const lines = text.split(/\r?\n/);
+    console.log("Lines:", lines);
+    const deck = [];
+    let currentTopic = null;
+
+    lines.forEach((line, index) => {
+      const trimmed = line.trim(); // Trim the line first
+      console.log(`Processing line ${index}: "${trimmed}"`);
+      if (!trimmed) { // Skip blank lines
+          console.log("  Skipping blank line.");
+          return;
+      }
+
+      // Use the trimmed line for matching
+      const topicMatch    = /^\d+\.\s*(.+)$/.exec(trimmed);
+      const questionMatch = /^\d+\)\s*(.+)$/.exec(trimmed); // Corrected regex
+
+      if (topicMatch) {
+        console.log("  Matched Topic:", topicMatch[1].trim());
+        currentTopic = { name: topicMatch[1].trim(), questions: [] };
+        deck.push(currentTopic);
+      } else if (questionMatch && currentTopic) {
+        console.log("  Matched Question:", questionMatch[1].trim());
+        currentTopic.questions.push(questionMatch[1].trim());
+      } else {
+        console.log("  No match on this line.");
+      }
+    });
+
+    console.log("Parsed Deck:", deck);
+    try {
+        window.grammarStorage.saveDeck(deck);
+        console.log("Deck saved to localStorage.");
+    } catch (e) {
+        console.error("Error saving deck:", e);
+    }
+    renderTopicList();
+    selectedTopicIdx = null;
+    const qm = document.getElementById('question-manager');
+    if (qm) qm.style.display = 'none';
+    console.log("--- Finished Bulk Input ---");
+  }
+
+  // Define recording functions BEFORE renderCard
+  function startAnswerRecording() {
+    // reuse part1 recorder
+    window.part1.startRecording();
+  }
+  // Make this async to await the promise from part1.stopRecording
+  async function stopAnswerRecording() {
+    const answerPlaybackEl = document.getElementById('answer-playback');
+    const playbackEl = document.getElementById('playback'); // Still need for cleanup
+
+    try {
+      // Await the blob URL from part1.js
+      const blobUrl = await window.part1.stopRecording();
+
+      if (blobUrl && blobUrl.startsWith('blob:')) {
+        if (answerPlaybackEl) {
+          answerPlaybackEl.src = blobUrl;
+        }
+      } else {
+        // If no valid URL, clear the playback
+        if (answerPlaybackEl) {
+          answerPlaybackEl.removeAttribute('src');
+        }
+      }
+    } catch (error) {
+      console.error("Error stopping recording or getting blob URL:", error);
+      if (answerPlaybackEl) {
+        answerPlaybackEl.removeAttribute('src');
+      }
+    } finally {
+      // Cleanup the original playback element regardless of success/failure
+      if (playbackEl) {
+        playbackEl.removeAttribute('src');
+        if (playbackEl.srcObject) {
+          playbackEl.srcObject.getTracks().forEach(track => track.stop());
+          playbackEl.srcObject = null;
+        }
+      }
+    }
+  }
+
+  // Define renderCard AFTER recording functions
+  function renderCard(card) {
+    const topicEl    = document.getElementById('card-topic');
+    const questionEl = document.getElementById('card-question');
+    const nextBtn    = document.getElementById('next-card-btn');
+
+    if (card) {
+      topicEl.textContent    = card.topic;
+      questionEl.textContent = card.question || '(no questions)'; // Keep handling empty questions
+      nextBtn.disabled       = false;
+      const answerPlaybackEl = document.getElementById('answer-playback');
+      if (answerPlaybackEl) {
+          answerPlaybackEl.removeAttribute('src');
+      }
+      // Check state before starting
+      if (window.part1 && window.part1.recorderState !== 'recording') {
+          startAnswerRecording();
+      }
+    } else {
+      topicEl.textContent    = '—';
+      questionEl.textContent = '🎉 You’ve reached the end of the deck!'; // Updated message
+      nextBtn.disabled       = true;
+      // Stop recording if we hit the end
+      // No need to check state here, stopAnswerRecording handles it
+      stopAnswerRecording(); // This is now async, but we don't need to await it here
+    }
+  }
+
+  // Define init AFTER helper functions
   function init() {
-    // Part 1: Read-Aloud & Snippet Management
+    // Part 1: Read-Aloud & Snippet Management
     document.getElementById('add-snippet-btn').addEventListener('click', () => {
       const textarea = document.getElementById('snippet-input');
       const text = textarea.value.trim();
@@ -137,93 +274,72 @@
     const prevCardBtn        = document.getElementById('prev-card-btn');
     const nextCardBtn        = document.getElementById('next-card-btn');
     const restartBtn         = document.getElementById('restart-deck-btn');
-    const cardTopicEl        = document.getElementById('card-topic');
-    const cardQuestionEl     = document.getElementById('card-question');
 
-    /**
-     * Render a flashcard or show end-of-deck state.
-     * @param {{topic: string, question: string}|null} card
-     */
-    function renderCard(card) {
-      const nextBtn = document.getElementById('next-card-btn'); // Get button inside function
+    // Hook up the Import button
+    document.getElementById('parse-bulk-btn') // Line ~194
+      .addEventListener('click', () => {
+        const raw = document.getElementById('bulk-input').value;
+        parseBulkInput(raw); // Calls function defined above
+      });
 
-      if (card) {
-        // Normal card
-        cardTopicEl.textContent    = card.topic;
-        cardQuestionEl.textContent = card.question || '(no questions)'; // Keep handling empty questions
-        nextBtn.disabled           = false;
-      } else {
-        // End of deck
-        cardTopicEl.textContent    = '—';
-        cardQuestionEl.textContent = '🎉 You’ve reached the end of the deck!';
-        nextBtn.disabled           = true;
-      }
-    }
-
-    // Initial render for topics
-    renderTopicList();
-
-    // Add new topic listener
-    document.getElementById('add-topic-btn').addEventListener('click', () => {
-      const input = document.getElementById('new-topic-input');
-      const name = input.value.trim();
-      if (name) {
-        window.grammarStorage.addTopic(name);
-        input.value = '';
-        renderTopicList();
-      }
-    });
-
-    // Add new question listener
-    document.getElementById('add-question-btn').addEventListener('click', () => {
-      const input = document.getElementById('new-question-input');
-      const question = input.value.trim();
-      if (question && selectedTopicIdx !== null) {
-        window.grammarStorage.addQuestion(selectedTopicIdx, question);
-        input.value = '';
-        renderQuestionList();
-      }
-    });
-
-    // Flashcard session controls
+    // Update Prev/Next/Restart handlers to call the async stopAnswerRecording
+    // We don't strictly need to await here unless subsequent actions depend on it finishing
     nextCardBtn.addEventListener('click', () => {
+      stopAnswerRecording(); // Call async function
       const card = window.part2.getNextCard();
       renderCard(card);
     });
-    prevCardBtn.addEventListener('click', () => renderCard(window.part2.getPrevCard())); // Keep prev as is for now
+    prevCardBtn.addEventListener('click', () => {
+      stopAnswerRecording(); // Call async function
+      const card = window.part2.getPrevCard();
+      renderCard(card);
+    });
     restartBtn.addEventListener('click', () => {
-      const firstCard = window.part2.restartSession();
-      renderCard(firstCard);
-      // Optional: focus the Next button
+      stopAnswerRecording(); // Call async function
+      const first = window.part2.restartSession();
+      renderCard(first);
       document.getElementById('next-card-btn').focus();
     });
 
-    // Tab click handler: show/hide modules
-    const modulesByPart = {
-      '1': ['part1-module', 'snippet-manager'],
-      '2': ['part2-module'],
-      '3': ['part3-module'],
-      '4': ['part4-module']
-    };
-    document.querySelectorAll('nav.tabs li').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('nav.tabs li').forEach(t => t.classList.remove('is-active'));
-        tab.classList.add('is-active');
-        document.querySelectorAll('#app .box, #snippet-manager').forEach(el => el.style.display = 'none');
-        const part = tab.dataset.part;
-        (modulesByPart[part] || []).forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.style.display = '';
-        });
-      });
-    });
-
-    // Initial render calls (Keep these)
+    // Initial render calls
     renderSnippetList();
     renderTopicList();
     window.part2.startSession();
-    renderCard(window.part2.getNextCard()); // Initial card render
+    renderCard(window.part2.getNextCard()); // Calls renderCard (line ~194)
   }
 
-  document.addEventListener('DOMContentLoaded', init);
+  // Simplified tab switching logic
+  function initTabSwitching() {
+    const tabs = document.querySelectorAll('nav.tabs li');
+    const modules = document.querySelectorAll('.module-box');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const part = tab.dataset.part; // e.g. "1", "2", ...
+
+        // Show only the module-boxes matching this part
+        modules.forEach(mod => {
+          mod.style.display = (mod.dataset.part === part) ? '' : 'none';
+        });
+
+        // Update active tab class
+        tabs.forEach(t => t.classList.remove('is-active'));
+        tab.classList.add('is-active');
+      });
+    });
+
+    // Ensure initial state is correct (Part 1 visible)
+    const initialPart = '1';
+    modules.forEach(mod => {
+      mod.style.display = (mod.dataset.part === initialPart) ? '' : 'none';
+    });
+    // Use optional chaining ?. in case the element isn't found immediately (though it should be)
+    document.querySelector(`nav.tabs li[data-part="${initialPart}"]`)?.classList.add('is-active');
+  }
+
+  // Run initial setup on DOMContentLoaded
+  document.addEventListener('DOMContentLoaded', () => {
+    init();
+    initTabSwitching();
+  });
 })(window);

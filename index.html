@@ -6,12 +6,111 @@
     <title>Korean Language Speaking Practice - Part 1</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
     <link rel="stylesheet" href="styles.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+/* --- Global Theme --- */
+
+:root {
+  --snu-gold: #d6b300;
+  --snu-beige: #f6f0e6;
+  --snu-silver: #c0c0c0;
+  --snu-blue: #0033a0;
+  --snu-red: #a40000;
+}
+
+body {
+  background-color: var(--snu-beige);
+  font-family: 'Noto Sans KR', 'Helvetica Neue', Montserrat, Arial, sans-serif; /* Updated font stack */
+  font-weight: 400; /* Default body weight */
+}
+
+/* Apply bolder weight to titles/headings */
+h1.title,
+h2.subtitle,
+h3.title,
+h3.subtitle {
+  color: var(--snu-blue);
+  font-weight: 700; /* Bolder weight for headings */
+}
+
+a {
+  color: var(--snu-blue);
+}
+
+a:hover {
+  color: var(--snu-gold);
+}
+
+section.section .title {
+  color: var(--snu-silver); /* Or white, or var(--snu-beige) */
+}
+
+.module-box {
+  background-color: white;
+  border: 1px solid var(--snu-silver);
+  border-radius: 5px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.flash-topic {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.flash-question {
+  font-style: italic;
+}
+
+.buttons .button {
+  margin-right: 10px;
+}
+
+#display-area {
+  min-height: 50px;
+}
+
+#snippet-list {
+  margin-top: 20px;
+}
+
+#question-list {
+  margin-top: 20px;
+}
+
+/* Style for the main title */
+h1.title.main-title {
+  color: #FFFFFF; /* White color */
+  font-weight: 700; /* Ensure bold weight */
+}
+
+/* --- Part 2 Flashcard Styling --- */
+#card-topic {
+  color: #FFFFFF; /* Use white for topic */
+  font-size: 2rem; /* Make topic text even larger */
+  margin-bottom: 0.8em; /* Increase spacing below topic */
+  line-height: 1.3; /* Add line height for better readability if topic wraps */
+  font-weight: 700; /* Bold topic */
+}
+
+#card-question {
+  color: #FFFFFF; /* Use white for question */
+  font-size: 1.5rem; /* Make question text even larger */
+  line-height: 1.4; /* Add line height for better readability */
+  font-weight: 400; /* Regular weight for question */
+}
+
+    </style>
 </head>
 <body>
     <!--Navbar Header  -->
     <section class="section">
         <div class="container">
-            <h1 class="title">Korean Speaking Practice - SNU Korean Smart Course +</h1>
+            <h1 class="title main-title">Korean Speaking Practice - SNU Korean Smart Course +</h1>
             <nav class="tabs">
                 <ul>
                     <li class="is-active" data-part="1"><a>Part 1: Read-Aloud</a></li>
@@ -52,50 +151,58 @@
         </div>
         <!-- Part 2: Grammar Flashcards Module -->
         <div class="box module-box" data-part="2" id="part2-module" style="display:none;">
-          <h2 class="subtitle">Part 2: Grammar Flashcards</h2>
+          <h2 class="subtitle">Part 2: Q&A Practice</h2>
 
-          <!-- Bulk Import Manager -->
-          <div id="bulk-input-manager" class="mb-4">
-            <label class="label">Paste all topics & questions here:</label>
-            <textarea id="bulk-input" class="textarea" rows="7" placeholder="
-        1. 명은/는 명이에요
-        1) 이름이 뭐예요?
-        2) 직업이 뭐예요?
-        ...
-        2. 명이/가 아니에요
-        1) ________ 씨는 한국 사람이에요?
-        ..."></textarea>
-            <button id="parse-bulk-btn" class="button is-small is-primary mt-2">
-              Import Topics & Questions
-            </button>
+          <!-- FLASHCARD AREA -->
+          <div id="flashcard" class="mb-5 content">
+            <h3 class="title is-4" id="card-topic">Topic Name</h3>
+            <p class="subtitle is-5" id="card-question">Question text goes here</p>
           </div>
 
-          <!-- Topic List & Question Manager -->
-          <div id="deck-manager" class="mb-4">
-            <ul id="topic-list" class="mt-2"></ul>
+          <!-- MANAGEMENT AREA (Topics & Questions) -->
+          <div class="columns">
+            <!-- Left Column: Topic Management -->
+            <div class="column is-one-third">
+              <h3 class="subtitle is-5">Topics</h3>
+              <div class="field has-addons mb-3">
+                <div class="control is-expanded">
+                  <input id="new-topic-input" class="input is-small" type="text" placeholder="New topic name">
+                </div>
+                <div class="control">
+                  <button id="add-topic-btn" class="button is-primary is-small">Add</button>
+                </div>
+              </div>
+              <ul id="topic-list" class="menu-list"></ul>
+            </div>
 
-            <div id="question-manager" class="box" style="display:none; margin-top:1rem;">
-              <h3 class="subtitle is-6">
-                Questions for: <strong><span id="selected-topic-name"></span></strong>
-              </h3>
-              <ul id="question-list" class="mt-2"></ul>
+            <!-- Right Column: Question Management (for selected topic) -->
+            <div class="column">
+              <div id="question-manager" style="display: none;"> <!-- Hidden initially -->
+                <h3 class="subtitle is-5">Questions for: <span id="selected-topic-name" class="has-text-weight-bold"></span></h3>
+                <div class="field has-addons mb-3">
+                  <div class="control is-expanded">
+                    <input id="new-question-input" class="input is-small" type="text" placeholder="New question for this topic">
+                  </div>
+                  <div class="control">
+                    <button id="add-question-btn" class="button is-info is-small">Add</button>
+                  </div>
+                </div>
+                <ul id="question-list" class="menu-list"></ul>
+              </div>
+              <div id="no-topic-selected" style="display: block;"> <!-- Shown initially -->
+                 <p class="has-text-grey">Select a topic on the left to manage its questions.</p>
+              </div>
             </div>
           </div>
 
-          <!-- Flashcard Display (no text‐input answer!) -->
-          <div id="flashcard" class="content">
-            <p><strong>Topic:</strong> <span id="card-topic">—</span></p>
-            <p><strong>Question:</strong> <span id="card-question">—</span></p>
-          </div>
-
-          <!-- Controls -->
-          <div class="buttons mt-4">
-            <button id="prev-card-btn" class="button is-light">Previous</button>
+          <!-- NAVIGATION CONTROLS -->
+          <div class="buttons mt-5 pt-5 border-top">
+            <button id="prev-card-btn" class="button is-link">Previous</button>
             <button id="next-card-btn" class="button is-link">Next</button>
             <button id="restart-deck-btn" class="button is-warning">Restart Deck</button>
           </div>
-          
-          <!-- Playback for recorded answers -->
+
+          <!-- PLAYBACK -->
           <audio id="answer-playback" controls class="mt-4"></audio>
         </div>
 
@@ -113,5 +220,75 @@
     <script src="part1.js" defer></script>
     <script src="app.js" defer></script>
     <script src="part2.js" defer></script>
+    <script>
+  (function(window) {
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let recorderState = 'inactive';
+    let currentUtterance = null; // Keep track of the current utterance
+
+    /** Gets a random snippet from the stored list. */
+    function getRandomSnippet() {
+      const snippets = window.Storage.loadSnippets(); // Use window.Storage
+      if (!snippets || snippets.length === 0) {
+        return "No snippets available. Add some first!";
+      }
+      const randomIndex = Math.floor(Math.random() * snippets.length);
+      return snippets[randomIndex];
+    }
+
+    function playText(text) {
+      if (!text) return;
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+      }
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ko-KR';
+      const voices = window.speechSynthesis.getVoices();
+      const koVoice = voices.find(v => v.lang.startsWith('ko'));
+      if (koVoice) {
+        utterance.voice = koVoice;
+        console.log("Using voice:", koVoice.name);
+      } else {
+        console.log("No specific Korean voice found, using default for ko-KR.");
+      }
+      currentUtterance = utterance;
+      utterance.onstart = () => console.log("Speech started");
+      utterance.onend = () => {
+        console.log("Speech finished");
+        currentUtterance = null;
+      };
+      utterance.onerror = (event) => {
+        console.error("Speech synthesis error:", event.error);
+        currentUtterance = null;
+      };
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function startRecording() {
+      // ... existing startRecording code ...
+    }
+
+    /** Stops recording if active and returns a Promise resolving with the blob URL. */
+    function stopRecording() {
+      // ... existing stopRecording code ...
+    }
+
+    // Expose API
+    window.part1 = {
+      getRandomSnippet: getRandomSnippet, // Expose the function
+      playText: playText,
+      startRecording: startRecording,
+      stopRecording: stopRecording,
+      get recorderState() { return recorderState; }
+    };
+
+    // Optional: Add listener for voiceschanged
+    window.speechSynthesis.onvoiceschanged = () => {
+        console.log("Voices loaded:", window.speechSynthesis.getVoices());
+    };
+
+  })(window);
+</script>
 </body>
 </html>

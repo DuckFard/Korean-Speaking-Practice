@@ -1,0 +1,131 @@
+/* Existing styles if any */
+/* ... */
+
+:root {
+  --snu-blue:   #0F0F70;
+  --snu-beige:  #DCDAB2;
+  --snu-gray:   #666666;
+  --snu-gold:   #C5A86F;
+  --snu-silver: #B5B6B6;
+}
+
+/* --- Global Theme --- */
+body {
+  background: var(--snu-beige);
+  color: var(--snu-gray);
+  font-family: sans-serif;
+}
+nav.tabs, section.section {
+  background: var(--snu-blue);
+}
+nav.tabs a {
+  color: var(--snu-silver);
+}
+/* Ensure active tab is visible */
+nav.tabs li.is-active a {
+    color: white; /* Or another contrasting color */
+    border-bottom-color: var(--snu-gold); /* Example highlight */
+}
+.box {
+  background: var(--snu-silver);
+  border: 2px solid var(--snu-blue);
+}
+.button.is-primary {
+  background: var(--snu-blue);
+  border-color: var(--snu-blue);
+  color: white;
+}
+.button.is-link {
+  background: var(--snu-gold);
+  border-color: var(--snu-gold);
+  color: white;
+}
+.button.is-warning {
+  background: var(--snu-gold);
+  border-color: var(--snu-gold);
+  color: white;
+}
+.button.is-danger {
+  background: var(--snu-blue);
+  border-color: var(--snu-blue);
+  color: white;
+}
+
+/* --- Part 2 Layout & Styling --- */
+#part2-module {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+}
+#flashcard {
+  width: 100%;
+  min-height: 180px;
+  background: var(--snu-blue);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  border-radius: 8px;
+  padding: 1rem; /* Added padding */
+}
+.flash-topic {
+  font-size: 2rem; /* Increased size */
+  font-weight: bold; /* Make it bold */
+  margin-bottom: 1rem; /* Add more space below topic */
+}
+.flash-question {
+  font-size: 2.5rem; /* Kept large size */
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Side-by-side panels */
+#part2-main {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+#question-input-box,
+#question-list-box {
+  flex: 1;
+  background: var(--snu-beige);
+  border: 2px solid var(--snu-gray);
+  padding: 1rem;
+  border-radius: 6px;
+}
+/* Center the input controls */
+#question-input-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Ensure textarea takes available width */
+#question-input-box .textarea {
+    width: 100%;
+    margin-bottom: 0.5rem; /* Add some space before button */
+}
+
+/* Question list styling */
+#question-list-box ul {
+  list-style: none;
+  padding: 0;
+  margin: 0; /* Reset default margin */
+}
+#question-list-box li {
+  margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.25rem 0; /* Add some padding */
+}
+
+/* Playback audio styling */
+#answer-playback {
+  width: 100%;
+  max-width: 600px;
+}

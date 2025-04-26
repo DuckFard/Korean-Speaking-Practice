@@ -226,7 +226,7 @@
           startAnswerRecording();
       }
     } else {
-      topicEl.textContent    = '—';
+      topicEl.textContent    = '🎉 대박~~잘 했어요!!!';
       questionEl.textContent = '🎉 You’ve reached the end of the deck!'; // Updated message
       nextBtn.disabled       = true;
       // Stop recording if we hit the end
@@ -271,39 +271,97 @@
 
     // Part 2: Grammar Flashcards UI
     // Get references needed within init for Part 2
+    const addTopicBtn        = document.getElementById('add-topic-btn'); // Added back
+    const newTopicInput      = document.getElementById('new-topic-input'); // Added back
+    const addQuestionBtn     = document.getElementById('add-question-btn'); // Added back
+    const newQuestionInput   = document.getElementById('new-question-input'); // Added back
     const prevCardBtn        = document.getElementById('prev-card-btn');
     const nextCardBtn        = document.getElementById('next-card-btn');
     const restartBtn         = document.getElementById('restart-deck-btn');
+    // const bulkInputArea    = document.getElementById('bulk-input-area'); // Removed
+    // const processBulkBtn   = document.getElementById('process-bulk-btn'); // Removed
 
-    // Hook up the Import button
-    document.getElementById('parse-bulk-btn') // Line ~194
-      .addEventListener('click', () => {
-        const raw = document.getElementById('bulk-input').value;
-        parseBulkInput(raw); // Calls function defined above
-      });
+    // Add Topic
+    // Ensure elements exist before adding listeners
+    if (addTopicBtn && newTopicInput) {
+        addTopicBtn.addEventListener('click', () => {
+            // const newTopicInput = document.getElementById('new-topic-name'); // Incorrect ID used previously
+            const topicName = newTopicInput.value.trim();
+            if (topicName) {
+              window.grammarStorage.addTopic(topicName);
+              newTopicInput.value = ''; // Clear input
+              renderTopicList(); // Re-render topic list
+            }
+        });
+        newTopicInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addTopicBtn.click();
+        });
+    } else {
+        console.warn("Add Topic button or input not found.");
+    }
 
-    // Update Prev/Next/Restart handlers to call the async stopAnswerRecording
-    // We don't strictly need to await here unless subsequent actions depend on it finishing
-    nextCardBtn.addEventListener('click', () => {
-      stopAnswerRecording(); // Call async function
-      const card = window.part2.getNextCard();
-      renderCard(card);
-    });
-    prevCardBtn.addEventListener('click', () => {
-      stopAnswerRecording(); // Call async function
-      const card = window.part2.getPrevCard();
-      renderCard(card);
-    });
-    restartBtn.addEventListener('click', () => {
-      stopAnswerRecording(); // Call async function
-      const first = window.part2.restartSession();
-      renderCard(first);
-      document.getElementById('next-card-btn').focus();
-    });
+    // Add Question (to selected topic)
+    // Ensure elements exist before adding listeners
+    if (addQuestionBtn && newQuestionInput) {
+        addQuestionBtn.addEventListener('click', () => {
+            // const newQuestionInput = document.getElementById('new-question-text'); // Incorrect ID used previously
+            const questionText = newQuestionInput.value.trim();
+            if (selectedTopicIdx !== null && questionText) {
+              window.grammarStorage.addQuestion(selectedTopicIdx, questionText);
+              newQuestionInput.value = ''; // Clear input
+              renderQuestionList(); // Re-render question list
+            }
+        });
+        newQuestionInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addQuestionBtn.click();
+        });
+    } else {
+        console.warn("Add Question button or input not found.");
+    }
 
-    // Initial render calls
-    renderSnippetList();
-    renderTopicList();
+    // Card Navigation
+    // Ensure elements exist before adding listeners
+    if (nextCardBtn) {
+        nextCardBtn.addEventListener('click', () => {
+          stopAnswerRecording(); // Stop recording before getting next card
+          const card = window.part2.getNextCard();
+          renderCard(card);
+        });
+    } else {
+        console.warn("Next Card button not found.");
+    }
+    if (prevCardBtn) {
+        prevCardBtn.addEventListener('click', () => {
+          stopAnswerRecording(); // Stop recording before getting previous card
+          const card = window.part2.getPrevCard();
+          renderCard(card);
+        });
+    } else {
+        console.warn("Previous Card button not found.");
+    }
+    if (restartBtn) {
+        restartBtn.addEventListener('click', () => {
+          stopAnswerRecording(); // Stop recording before restarting
+          const first = window.part2.restartSession();
+          renderCard(first);
+          if (nextCardBtn) nextCardBtn.focus();
+        });
+    } else {
+        console.warn("Restart Deck button not found.");
+    }
+
+    // Bulk Input Processing - REMOVED
+    // if (processBulkBtn && bulkInputArea) {
+    //     processBulkBtn.addEventListener('click', () => {
+    //         const text = bulkInputArea.value;
+    //         parseBulkInput(text);
+    //     });
+    // } else {
+    //     console.warn("Bulk input elements not found.");
+    // }
+
+    // Initial render calls for Part 2
+    renderTopicList(); // Render topics first
     window.part2.startSession();
     renderCard(window.part2.getNextCard()); // Calls renderCard (line ~194)
   }

@@ -4,6 +4,7 @@ Here's a draft for the README file:
 
 # Korean Speaking Practice
 IMPORTANT NOTICE: This GitHub projects does not provide any materials taken from the SNU Smart Course + and therefore does not violate any rules agreed upon with Seoul National University. Thank you for your understanding.
+
 This repository contains the back-end code for a website designed to help students currently enrolling in the Korean Smart Course + created by Seoul National University to practice the Korean Speaking section of the semesterly Korean test. At this time, Part 1 and Part 2 of the test can be accessed and practced, while Part 3 and $ will be under progress in due time.
 
 ## Table of Contents

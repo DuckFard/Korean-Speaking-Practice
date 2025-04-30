@@ -2,10 +2,7 @@
 (function(window) {
     const STORAGE_KEY = 'snippets';
   
-    /**
-     * Load the list of snippets from localStorage.
-     * @returns {string[]} An array of snippet strings.
-     */
+    /** @returns {string[]} An array of snippet strings.*/
     function loadSnippets() {
       const data = localStorage.getItem(STORAGE_KEY);
       if (!data) {

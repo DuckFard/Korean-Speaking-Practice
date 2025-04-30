@@ -4,7 +4,7 @@
     let recordedChunks = [];
     let recorderState = 'inactive';
   
-    /** Selects a random snippet */
+    /** Get random snippet */
     function getRandomSnippet() {
       const snippets = window.Storage.loadSnippets();
       if (!snippets || snippets.length === 0) {
@@ -14,14 +14,12 @@
       return snippets[idx];
     }
   
-    /** Uses the Web Speech API to speak. */
+    /** Web Speech API*/
     function playText(text) {
       if (!text) return;
       const utterance = new SpeechSynthesisUtterance(text);
       window.speechSynthesis.speak(utterance);
     }
-  
-    /** Starts recording audio. */
     function startRecording() {
       if (recorderState === 'recording') return;
       navigator.mediaDevices.getUserMedia({ audio: true })
@@ -51,14 +49,12 @@
         });
     }
   
-    /**Stops recording if active and updates the playback element.  */
     function stopRecording() {
       if (recorderState !== 'recording' || !mediaRecorder) return;
       mediaRecorder.stop();
       recorderState = 'inactive';
     }
   
-    // Expose API
     window.part1 = {
       getRandomSnippet,
       playText,

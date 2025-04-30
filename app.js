@@ -120,118 +120,66 @@
 
   // Define parseBulkInput BEFORE init
   function parseBulkInput(text) {
-    console.log("--- Starting Bulk Input ---");
-    console.log("Raw Text:", text);
-    // Correctly split by actual newline characters
+    // Split on real newlines (handles Windows & Unix)
     const lines = text.split(/\r?\n/);
-    console.log("Lines:", lines);
     const deck = [];
     let currentTopic = null;
 
-    lines.forEach((line, index) => {
-      const trimmed = line.trim(); // Trim the line first
-      console.log(`Processing line ${index}: "${trimmed}"`);
-      if (!trimmed) { // Skip blank lines
-          console.log("  Skipping blank line.");
-          return;
-      }
+    lines.forEach(line => {
+      const trimmed = line.trim();
+      if (!trimmed) return; // skip blank lines
 
-      // Use the trimmed line for matching
-      const topicMatch    = /^\d+\.\s*(.+)$/.exec(trimmed);
-      const questionMatch = /^\d+\)\s*(.+)$/.exec(trimmed); // Corrected regex
+      // Match “1. Topic name”
+      const topicMatch = /^(\d+\.\s*.+)$/.exec(trimmed);
+      // Match “1) Question text”
+      const questionMatch = /^(\d+\)\s*.+)$/.exec(trimmed);
 
       if (topicMatch) {
-        console.log("  Matched Topic:", topicMatch[1].trim());
+        // Start a new topic, keeping the numbering
         currentTopic = { name: topicMatch[1].trim(), questions: [] };
         deck.push(currentTopic);
       } else if (questionMatch && currentTopic) {
-        console.log("  Matched Question:", questionMatch[1].trim());
+        // Add question under the current topic, keeping the numbering
         currentTopic.questions.push(questionMatch[1].trim());
-      } else {
-        console.log("  No match on this line.");
       }
     });
 
-    console.log("Parsed Deck:", deck);
-    try {
-        window.grammarStorage.saveDeck(deck);
-        console.log("Deck saved to localStorage.");
-    } catch (e) {
-        console.error("Error saving deck:", e);
-    }
+    // Overwrite the entire deck at once
+    window.grammarStorage.saveDeck(deck);
     renderTopicList();
+    // Reset selection
     selectedTopicIdx = null;
-    const qm = document.getElementById('question-manager');
-    if (qm) qm.style.display = 'none';
-    console.log("--- Finished Bulk Input ---");
+    document.getElementById('question-manager').style.display = 'none';
   }
 
-  // Define recording functions BEFORE renderCard
-  function startAnswerRecording() {
-    // reuse part1 recorder
-    window.part1.startRecording();
-  }
-  // Make this async to await the promise from part1.stopRecording
-  async function stopAnswerRecording() {
-    const answerPlaybackEl = document.getElementById('answer-playback');
-    const playbackEl = document.getElementById('playback'); // Still need for cleanup
+  // Import or reference the loadDeck function from part2.js
+  const deck = window.grammarStorage.loadDeck();
 
-    try {
-      // Await the blob URL from part1.js
-      const blobUrl = await window.part1.stopRecording();
-
-      if (blobUrl && blobUrl.startsWith('blob:')) {
-        if (answerPlaybackEl) {
-          answerPlaybackEl.src = blobUrl;
-        }
-      } else {
-        // If no valid URL, clear the playback
-        if (answerPlaybackEl) {
-          answerPlaybackEl.removeAttribute('src');
-        }
-      }
-    } catch (error) {
-      console.error("Error stopping recording or getting blob URL:", error);
-      if (answerPlaybackEl) {
-        answerPlaybackEl.removeAttribute('src');
-      }
-    } finally {
-      // Cleanup the original playback element regardless of success/failure
-      if (playbackEl) {
-        playbackEl.removeAttribute('src');
-        if (playbackEl.srcObject) {
-          playbackEl.srcObject.getTracks().forEach(track => track.stop());
-          playbackEl.srcObject = null;
-        }
-      }
-    }
-  }
-
-  // Define renderCard AFTER recording functions
+  // Update card rendering logic (removed audio recording functionality)
   function renderCard(card) {
-    const topicEl    = document.getElementById('card-topic');
-    const questionEl = document.getElementById('card-question');
-    const nextBtn    = document.getElementById('next-card-btn');
-
-    if (card) {
-      topicEl.textContent    = card.topic;
-      questionEl.textContent = card.question || '(no questions)'; // Keep handling empty questions
-      nextBtn.disabled       = false;
-      const answerPlaybackEl = document.getElementById('answer-playback');
-      if (answerPlaybackEl) {
-          answerPlaybackEl.removeAttribute('src');
-      }
-      // Check state before starting
-      if (window.part1 && window.part1.recorderState !== 'recording') {
-          startAnswerRecording();
-      }
+    // Display the card topic and question if card exists
+    if (card && card.topic && card.question) {
+      document.getElementById('card-topic').textContent = card.topic;
+      document.getElementById('card-question').textContent = card.question;
+      
+      // Enable/disable navigation buttons as needed
+      document.getElementById('next-card-btn').disabled = false;
+      document.getElementById('prev-card-btn').disabled = (window.part2.currentPos <= 0);
     } else {
-      topicEl.textContent    = '🎉 대박~~잘 했어요!!!';
-      questionEl.textContent = '🎉 You’ve reached the end of the deck!'; // Updated message
-      nextBtn.disabled       = true;
-      // Stop recording if we hit the end
-      // No need to check state here, stopAnswerRecording handles it
-      stopAnswerRecording(); // This is now async, but we don't need to await it here
+      // Handle end of deck or empty deck
+      const deck = window.grammarStorage.loadDeck();
+      const topicsWithQuestionsExist = deck.some(topic => topic.questions.length > 0);
+      
+      if (topicsWithQuestionsExist) {
+        document.getElementById('card-topic').textContent = '🎉 End of Deck!';
+        document.getElementById('card-question').textContent = 'You\'ve gone through all topics with questions.';
+      } else {
+        document.getElementById('card-topic').textContent = 'Deck Empty';
+        document.getElementById('card-question').textContent = 'Add some topics and questions first!';
+      }
+      
+      document.getElementById('next-card-btn').disabled = true;
+      document.getElementById('prev-card-btn').disabled = (window.part2.currentPos <= 0);
     }
   }
 
@@ -278,8 +226,8 @@
     const prevCardBtn        = document.getElementById('prev-card-btn');
     const nextCardBtn        = document.getElementById('next-card-btn');
     const restartBtn         = document.getElementById('restart-deck-btn');
-    // const bulkInputArea    = document.getElementById('bulk-input-area'); // Removed
-    // const processBulkBtn   = document.getElementById('process-bulk-btn'); // Removed
+    const processBulkBtn     = document.getElementById('process-bulk-btn');
+    const bulkInputArea      = document.getElementById('bulk-input-area');
 
     // Add Topic
     // Ensure elements exist before adding listeners
@@ -323,7 +271,6 @@
     // Ensure elements exist before adding listeners
     if (nextCardBtn) {
         nextCardBtn.addEventListener('click', () => {
-          stopAnswerRecording(); // Stop recording before getting next card
           const card = window.part2.getNextCard();
           renderCard(card);
         });
@@ -332,7 +279,6 @@
     }
     if (prevCardBtn) {
         prevCardBtn.addEventListener('click', () => {
-          stopAnswerRecording(); // Stop recording before getting previous card
           const card = window.part2.getPrevCard();
           renderCard(card);
         });
@@ -341,7 +287,6 @@
     }
     if (restartBtn) {
         restartBtn.addEventListener('click', () => {
-          stopAnswerRecording(); // Stop recording before restarting
           const first = window.part2.restartSession();
           renderCard(first);
           if (nextCardBtn) nextCardBtn.focus();
@@ -350,52 +295,52 @@
         console.warn("Restart Deck button not found.");
     }
 
-    // Bulk Input Processing - REMOVED
-    // if (processBulkBtn && bulkInputArea) {
-    //     processBulkBtn.addEventListener('click', () => {
-    //         const text = bulkInputArea.value;
-    //         parseBulkInput(text);
-    //     });
-    // } else {
-    //     console.warn("Bulk input elements not found.");
-    // }
+    // Event listener for Process Bulk
+    if (processBulkBtn && bulkInputArea) {
+      processBulkBtn.addEventListener('click', () => {
+        const text = bulkInputArea.value.trim();
+        if (text) {
+          parseBulkInput(text);
+          bulkInputArea.value = ''; // Clear after processing
+        }
+      });
+    } else {
+      console.warn("Bulk input elements not found.");
+    }
 
-    // Initial render calls for Part 2
-    renderTopicList(); // Render topics first
+    renderTopicList(); 
     window.part2.startSession();
-    renderCard(window.part2.getNextCard()); // Calls renderCard (line ~194)
+    renderCard(window.part2.getNextCard()); 
   }
 
-  // Simplified tab switching logic
+  // Tab switching
   function initTabSwitching() {
     const tabs = document.querySelectorAll('nav.tabs li');
     const modules = document.querySelectorAll('.module-box');
 
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
-        const part = tab.dataset.part; // e.g. "1", "2", ...
+        const part = tab.dataset.part; 
 
-        // Show only the module-boxes matching this part
+        // Show matching module-boxes
         modules.forEach(mod => {
           mod.style.display = (mod.dataset.part === part) ? '' : 'none';
         });
 
-        // Update active tab class
+        // Update active tab
         tabs.forEach(t => t.classList.remove('is-active'));
         tab.classList.add('is-active');
       });
     });
 
-    // Ensure initial state is correct (Part 1 visible)
     const initialPart = '1';
     modules.forEach(mod => {
       mod.style.display = (mod.dataset.part === initialPart) ? '' : 'none';
-    });
-    // Use optional chaining ?. in case the element isn't found immediately (though it should be)
+    });// Checking to ensure
     document.querySelector(`nav.tabs li[data-part="${initialPart}"]`)?.classList.add('is-active');
   }
 
-  // Run initial setup on DOMContentLoaded
+  // Initial setup
   document.addEventListener('DOMContentLoaded', () => {
     init();
     initTabSwitching();

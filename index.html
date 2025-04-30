@@ -12,7 +12,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
-/* --- Global Theme --- */
 
 :root {
   --snu-gold: #d6b300;
@@ -24,17 +23,17 @@
 
 body {
   background-color: var(--snu-beige);
-  font-family: 'Noto Sans KR', 'Helvetica Neue', Montserrat, Arial, sans-serif; /* Updated font stack */
-  font-weight: 400; /* Default body weight */
+  font-family: 'Noto Sans KR', 'Helvetica Neue', Montserrat, Arial, sans-serif; 
+  font-weight: 400; /*standard weight*/
 }
 
-/* Apply bolder weight to titles/headings */
+/*Heading styles*/
 h1.title,
 h2.subtitle,
 h3.title,
 h3.subtitle {
   color: var(--snu-blue);
-  font-weight: 700; /* Bolder weight for headings */
+  font-weight: 700; /*Bolded headings*/
 }
 
 a {
@@ -46,7 +45,7 @@ a:hover {
 }
 
 section.section .title {
-  color: var(--snu-silver); /* Or white, or var(--snu-beige) */
+  color: var(--snu-silver); 
 }
 
 .module-box {
@@ -82,39 +81,38 @@ section.section .title {
   margin-top: 20px;
 }
 
-/* Style for the main title */
 h1.title.main-title {
-  color: #FFFFFF; /* White color */
-  font-weight: 700; /* Ensure bold weight */
+  color: #FFFFFF; 
+  font-weight: 700; 
 }
 
-/* --- Part 2 Flashcard Styling --- */
+/*Flashcard*/
 #card-topic {
-  color: #FFFFFF; /* Use white for topic */
-  font-size: 2rem; /* Make topic text even larger */
-  margin-bottom: 0.8em; /* Increase spacing below topic */
-  line-height: 1.3; /* Add line height for better readability if topic wraps */
-  font-weight: 700; /* Bold topic */
+  color: #FFFFFF; 
+  font-size: 2.5rem; 
+  margin-bottom: 0.8em; 
+  line-height: 1.3;
+  font-weight: 700; 
 }
 
 #card-question {
-  color: #FFFFFF; /* Use white for question */
-  font-size: 1.5rem; /* Make question text even larger */
-  line-height: 1.4; /* Add line height for better readability */
-  font-weight: 400; /* Regular weight for question */
+  color: #FFFFFF; 
+  font-size: 1.75rem; 
+  line-height: 1.4; 
+  font-weight: 400;
 }
 
     </style>
 </head>
 <body>
-    <!--Navbar Header  -->
+    <!--Navbar Header-->
     <section class="section">
         <div class="container">
             <h1 class="title main-title">Korean Speaking Practice - SNU Korean Smart Course +</h1>
             <nav class="tabs">
                 <ul>
                     <li class="is-active" data-part="1"><a>Part 1: Read-Aloud</a></li>
-                    <li data-part="2"><a>Part 2: Q&A</a></li>
+                    <li data-part="2"><a>Part 2: Interview</a></li>
                     <li data-part="3"><a>Part 3: Picture Description</a></li>
                     <li data-part="4"><a>Part 4: Roleplay</a></li>
                 </ul>
@@ -123,9 +121,9 @@ h1.title.main-title {
     </section>
 
 
-    <!-- Main App Container -->
+    <!--Main App Container-->
     <div class="container" id="app">
-        <!-- Read-Aloud Module -->
+        <!-- Read-Aloud-->
         <div class="box module-box" data-part="1" id="part1-module">
             <h2 class="subtitle">Part 1: Read-Aloud</h2>
             <div id="display-area" class="content">Click "Next Text" to load a snippet.</div>
@@ -136,7 +134,7 @@ h1.title.main-title {
             </div>
             <audio id="playback" controls class="mt-4"></audio>
         </div>
-        <!-- Snippet Management -->
+        <!--Snippet Management-->
         <div class="box module-box" data-part="1" id="snippet-manager">
             <h2 class="subtitle">Manage Text Snippets</h2>
             <div class="field has-addons">
@@ -152,13 +150,17 @@ h1.title.main-title {
         <!-- Part 2: Grammar Flashcards Module -->
         <div class="box module-box" data-part="2" id="part2-module" style="display:none;">
           <h2 class="subtitle">Part 2: Q&A Practice</h2>
-
           <!-- FLASHCARD AREA -->
           <div id="flashcard" class="mb-5 content">
             <h3 class="title is-4" id="card-topic">Topic Name</h3>
             <p class="subtitle is-5" id="card-question">Question text goes here</p>
           </div>
-
+          <!-- NAVIGATION CONTROLS -->
+          <div class="buttons mt-5 mb-5 pb-5 border-bottom">
+            <button id="prev-card-btn" class="button is-link">Previous</button>
+            <button id="next-card-btn" class="button is-link">Next</button>
+            <button id="restart-deck-btn" class="button is-warning">Restart Deck</button>
+          </div>
           <!-- MANAGEMENT AREA (Topics & Questions) -->
           <div class="columns">
             <!-- Left Column: Topic Management -->
@@ -177,7 +179,7 @@ h1.title.main-title {
 
             <!-- Right Column: Question Management (for selected topic) -->
             <div class="column">
-              <div id="question-manager" style="display: none;"> <!-- Hidden initially -->
+              <div id="question-manager" style="display: none;"> 
                 <h3 class="subtitle is-5">Questions for: <span id="selected-topic-name" class="has-text-weight-bold"></span></h3>
                 <div class="field has-addons mb-3">
                   <div class="control is-expanded">
@@ -189,49 +191,51 @@ h1.title.main-title {
                 </div>
                 <ul id="question-list" class="menu-list"></ul>
               </div>
-              <div id="no-topic-selected" style="display: block;"> <!-- Shown initially -->
+              <div id="no-topic-selected" style="display: block;"> 
                  <p class="has-text-grey">Select a topic on the left to manage its questions.</p>
               </div>
             </div>
           </div>
 
-          <!-- NAVIGATION CONTROLS -->
-          <div class="buttons mt-5 pt-5 border-top">
-            <button id="prev-card-btn" class="button is-link">Previous</button>
-            <button id="next-card-btn" class="button is-link">Next</button>
-            <button id="restart-deck-btn" class="button is-warning">Restart Deck</button>
+          <!-- BULK INPUT AREA -->
+          <div class="box">
+            <h3 class="subtitle is-5">Bulk Import Topics & Questions</h3>
+            <textarea id="bulk-input-area" class="textarea" placeholder="1. '-' 탈락
+
+1) 요즘 바빠요?
+
+2) 어디가 아프세요?
+
+3) 오늘 날씨가 좋아요? 아니요. __________
+
+2. -고 싶다
+
+1) 지금 뭐 하고 싶어요?
+
+2) 무슨 음식을 먹고 싶어요?
+            "></textarea>
+            <button id="process-bulk-btn" class="button is-primary mt-3">Process Bulk Input</button>
           </div>
 
-          <!-- PLAYBACK -->
-          <audio id="answer-playback" controls class="mt-4"></audio>
         </div>
 
-        <!-- Add placeholders for future parts if needed -->
-        <!-- 
-        <div class="box module-box" data-part="3" id="part3-module" style="display:none;">
-            <h2 class="subtitle">Part 3: Picture Description</h2>
-        </div>
-        <div class="box module-box" data-part="4" id="part4-module" style="display:none;">
-            <h2 class="subtitle">Part 4: Roleplay</h2>
-        </div>
-        -->
     </div>
     <script src="storage.js" defer></script>
     <script src="part1.js" defer></script>
-    <script src="app.js" defer></script>
     <script src="part2.js" defer></script>
+    <script src="app.js" defer></script>
     <script>
   (function(window) {
     let mediaRecorder = null;
     let recordedChunks = [];
     let recorderState = 'inactive';
-    let currentUtterance = null; // Keep track of the current utterance
+    let currentUtterance = null; 
 
-    /** Gets a random snippet from the stored list. */
+    /** Gets random snippet*/
     function getRandomSnippet() {
-      const snippets = window.Storage.loadSnippets(); // Use window.Storage
+      const snippets = window.Storage.loadSnippets(); 
       if (!snippets || snippets.length === 0) {
-        return "No snippets available. Add some first!";
+        return "No snippets available. Add some first my 자기기!";
       }
       const randomIndex = Math.floor(Math.random() * snippets.length);
       return snippets[randomIndex];
@@ -266,24 +270,21 @@ h1.title.main-title {
     }
 
     function startRecording() {
-      // ... existing startRecording code ...
-    }
+    } //WIP
 
-    /** Stops recording if active and returns a Promise resolving with the blob URL. */
     function stopRecording() {
-      // ... existing stopRecording code ...
-    }
+    } //WIP
 
     // Expose API
     window.part1 = {
-      getRandomSnippet: getRandomSnippet, // Expose the function
+      getRandomSnippet: getRandomSnippet, // Expose
       playText: playText,
       startRecording: startRecording,
       stopRecording: stopRecording,
       get recorderState() { return recorderState; }
     };
 
-    // Optional: Add listener for voiceschanged
+    // WIP: Add listener for voiceschanged
     window.speechSynthesis.onvoiceschanged = () => {
         console.log("Voices loaded:", window.speechSynthesis.getVoices());
     };
